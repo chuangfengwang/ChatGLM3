@@ -153,11 +153,12 @@ class HFClient(Client):
                     new_prefix_state_dict[k[len("transformer.prefix_encoder."):]] = v
             print("Loaded from pt checkpoints", new_prefix_state_dict.keys())
             self.model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
+            self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
         else:
             # If you need 4bit quantization, run:
-            # self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True).quantize(4).cuda()
-            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
-        self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
+            self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True).half().quantize(4).cuda()
+            #self.model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
+        #self.model = self.model.to(DEVICE).eval() if 'cuda' in DEVICE else self.model.float().to(DEVICE).eval()
 
     def generate_stream(self,
                         system: str | None,
